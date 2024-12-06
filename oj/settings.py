@@ -15,11 +15,13 @@ from copy import deepcopy
 from utils.shortcuts import get_env
 
 # 判断是否为生产环境
-production_env = get_env("OJ_ENV", "dev") == "production"
-if production_env:
-    from .production_settings import *
-else:
-    from .dev_settings import *
+# production_env = get_env("OJ_ENV", "dev") == "production"
+# if production_env:
+#     from .production_settings import *
+# else:
+#     from .dev_settings import *
+
+from .dev_settings import *
 
 # 读取密钥文件
 with open(os.path.join(DATA_DIR, "config", "secret.key"), "r") as f:
@@ -41,8 +43,8 @@ VENDOR_APPS = [
 ]
 
 # 如果是生产环境，添加 raven 以支持 Sentry
-if production_env:
-    VENDOR_APPS.append('raven.contrib.django.raven_compat')
+# if production_env:
+#     VENDOR_APPS.append('raven.contrib.django.raven_compat')
 
 # 本地应用程序 Applications
 LOCAL_APPS = [
@@ -156,7 +158,9 @@ UPLOAD_DIR = f"{DATA_DIR}{UPLOAD_PREFIX}"
 STATICFILES_DIRS = [os.path.join(DATA_DIR, "public")]
 
 # 日志处理程序
-LOGGING_HANDLERS = ['console', 'sentry'] if production_env else ['console']
+# LOGGING_HANDLERS = ['console', 'sentry'] if production_env else ['console']
+LOGGING_HANDLERS = ['console']
+
 # 日志配置
 LOGGING = {
    'version': 1,  # 日志配置版本
