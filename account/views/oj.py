@@ -92,7 +92,7 @@ class TwoFactorAuthAPI(APIView):
     @login_required
     def get(self, request):
         """
-        Get QR code
+        获取二维码
         """
         user = request.user
         if user.two_factor_auth:
@@ -109,7 +109,7 @@ class TwoFactorAuthAPI(APIView):
     @validate_serializer(TwoFactorAuthCodeSerializer)
     def post(self, request):
         """
-        Open 2FA
+        开启2FA
         """
         code = request.data["code"]
         user = request.user
@@ -123,6 +123,9 @@ class TwoFactorAuthAPI(APIView):
     @login_required
     @validate_serializer(TwoFactorAuthCodeSerializer)
     def put(self, request):
+        """
+        关闭2FA
+        """
         code = request.data["code"]
         user = request.user
         if not user.two_factor_auth:
@@ -139,7 +142,7 @@ class CheckTFARequiredAPI(APIView):
     @validate_serializer(UsernameOrEmailCheckSerializer)
     def post(self, request):
         """
-        Check TFA is required
+        检查是否需要2FA
         """
         data = request.data
         result = False
@@ -187,6 +190,9 @@ class UserLoginAPI(APIView):
 
 class UserLogoutAPI(APIView):
     def get(self, request):
+        """
+        用户登出接口
+        """
         auth.logout(request)
         return self.success()
 
@@ -195,10 +201,10 @@ class UsernameOrEmailCheck(APIView):
     @validate_serializer(UsernameOrEmailCheckSerializer)
     def post(self, request):
         """
-        check username or email is duplicate
+        检查用户名或邮箱是否重复
         """
         data = request.data
-        # True means already exist.
+        # True表示已存在
         result = {
             "username": False,
             "email": False
@@ -248,6 +254,9 @@ class UserChangeEmailAPI(APIView):
     @validate_serializer(UserChangeEmailSerializer)
     @login_required
     def post(self, request):
+        """
+        用户更改邮箱接口
+        """
         data = request.data
         user = auth.authenticate(username=request.user.username, password=data["password"])
         if user:
@@ -271,7 +280,7 @@ class UserChangePasswordAPI(APIView):
     @login_required
     def post(self, request):
         """
-        User change password api
+        用户更改密码接口
         """
         data = request.data
         username = request.user.username
@@ -292,6 +301,9 @@ class UserChangePasswordAPI(APIView):
 class ApplyResetPasswordAPI(APIView):
     @validate_serializer(ApplyResetPasswordSerializer)
     def post(self, request):
+        """
+        申请重置密码接口
+        """
         if request.user.is_authenticated:
             return self.error("You have already logged in, are you kidding me? ")
         data = request.data
@@ -325,6 +337,9 @@ class ApplyResetPasswordAPI(APIView):
 class ResetPasswordAPI(APIView):
     @validate_serializer(ResetPasswordSerializer)
     def post(self, request):
+        """
+        重置密码接口
+        """
         data = request.data
         captcha = Captcha(request)
         if not captcha.check(data["captcha"]):
@@ -345,6 +360,9 @@ class ResetPasswordAPI(APIView):
 class SessionManagementAPI(APIView):
     @login_required
     def get(self, request):
+        """
+        获取会话管理信息
+        """
         engine = import_module(settings.SESSION_ENGINE)
         session_store = engine.SessionStore
         current_session = request.session.session_key
@@ -353,7 +371,7 @@ class SessionManagementAPI(APIView):
         modified = False
         for key in session_keys[:]:
             session = session_store(key)
-            # session does not exist or is expiry
+            # session不存在或已过期
             if not session._session:
                 session_keys.remove(key)
                 modified = True
@@ -373,6 +391,9 @@ class SessionManagementAPI(APIView):
 
     @login_required
     def delete(self, request):
+        """
+        删除会话
+        """
         session_key = request.GET.get("session_key")
         if not session_key:
             return self.error("Parameter Error")
@@ -387,6 +408,9 @@ class SessionManagementAPI(APIView):
 
 class UserRankAPI(APIView):
     def get(self, request):
+        """
+        获取用户排名
+        """
         rule_type = request.GET.get("rule")
         if rule_type not in ContestRuleType.choices():
             rule_type = ContestRuleType.ACM
@@ -402,6 +426,9 @@ class UserRankAPI(APIView):
 class ProfileProblemDisplayIDRefreshAPI(APIView):
     @login_required
     def get(self, request):
+        """
+        刷新问题显示ID
+        """
         profile = request.user.userprofile
         acm_problems = profile.acm_problems_status.get("problems", {})
         oi_problems = profile.oi_problems_status.get("problems", {})
@@ -421,6 +448,9 @@ class ProfileProblemDisplayIDRefreshAPI(APIView):
 class OpenAPIAppkeyAPI(APIView):
     @login_required
     def post(self, request):
+        """
+        获取OpenAPI应用密钥
+        """
         user = request.user
         if not user.open_api:
             return self.error("OpenAPI function is truned off for you")
@@ -433,6 +463,9 @@ class OpenAPIAppkeyAPI(APIView):
 class SSOAPI(CSRFExemptAPIView):
     @login_required
     def get(self, request):
+        """
+        获取SSO认证令牌
+        """
         token = rand_str()
         request.user.auth_token = token
         request.user.save()
@@ -441,6 +474,9 @@ class SSOAPI(CSRFExemptAPIView):
     @method_decorator(csrf_exempt)
     @validate_serializer(SSOSerializer)
     def post(self, request):
+        """
+        验证SSO认证令牌
+        """
         try:
             user = User.objects.get(auth_token=request.data["token"])
         except User.DoesNotExist:

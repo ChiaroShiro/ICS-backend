@@ -122,10 +122,12 @@ class OptionDefaultValue:
 class _SysOptionsMeta(type):
     @classmethod
     def _get_keys(cls):
+        # 获取所有 OptionKeys 中定义的键
         return [key for key in OptionKeys.__dict__ if not key.startswith("__")]
 
     @classmethod
     def _init_option(mcs):
+        # 初始化选项，如果数据库中不存在则创建
         for item in mcs._get_keys():
             if not SysOptionsModel.objects.filter(key=item).exists():
                 default_value = getattr(OptionDefaultValue, item)
@@ -138,6 +140,7 @@ class _SysOptionsMeta(type):
 
     @classmethod
     def _get_option(mcs, option_key):
+        # 获取选项的值，如果不存在则初始化并重新获取
         try:
             option = SysOptionsModel.objects.get(key=option_key)
             value = option.value
@@ -148,6 +151,7 @@ class _SysOptionsMeta(type):
 
     @classmethod
     def _set_option(mcs, option_key: str, option_value):
+        # 设置选项的值，如果不存在则初始化并重新设置
         try:
             with transaction.atomic():
                 option = SysOptionsModel.objects.select_for_update().get(key=option_key)
@@ -159,6 +163,7 @@ class _SysOptionsMeta(type):
 
     @classmethod
     def _increment(mcs, option_key):
+        # 增加选项的值，如果不存在则初始化并重新增加
         try:
             with transaction.atomic():
                 option = SysOptionsModel.objects.select_for_update().get(key=option_key)
@@ -171,11 +176,13 @@ class _SysOptionsMeta(type):
 
     @classmethod
     def set_options(mcs, options):
+        # 批量设置选项的值
         for key, value in options:
             mcs._set_option(key, value)
 
     @classmethod
     def get_options(mcs, keys):
+        # 批量获取选项的值
         result = {}
         for key in keys:
             result[key] = mcs._get_option(key)
@@ -183,97 +190,121 @@ class _SysOptionsMeta(type):
 
     @my_property(ttl=DEFAULT_SHORT_TTL)
     def website_base_url(cls):
+        # 获取网站基础 URL
         return cls._get_option(OptionKeys.website_base_url)
 
     @website_base_url.setter
     def website_base_url(cls, value):
+        # 设置网站基础 URL
         cls._set_option(OptionKeys.website_base_url, value)
 
     @my_property(ttl=DEFAULT_SHORT_TTL)
     def website_name(cls):
+        # 获取网站名称
         return cls._get_option(OptionKeys.website_name)
 
     @website_name.setter
     def website_name(cls, value):
+        # 设置网站名称
         cls._set_option(OptionKeys.website_name, value)
 
     @my_property(ttl=DEFAULT_SHORT_TTL)
     def website_name_shortcut(cls):
+        # 获取网站名称缩写
         return cls._get_option(OptionKeys.website_name_shortcut)
 
     @website_name_shortcut.setter
     def website_name_shortcut(cls, value):
+        # 设置网站名称缩写
         cls._set_option(OptionKeys.website_name_shortcut, value)
 
     @my_property(ttl=DEFAULT_SHORT_TTL)
     def website_footer(cls):
+        # 获取网站页脚
         return cls._get_option(OptionKeys.website_footer)
 
     @website_footer.setter
     def website_footer(cls, value):
+        # 设置网站页脚
         cls._set_option(OptionKeys.website_footer, value)
 
     @my_property
     def allow_register(cls):
+        # 获取是否允许注册
         return cls._get_option(OptionKeys.allow_register)
 
     @allow_register.setter
     def allow_register(cls, value):
+        # 设置是否允许注册
         cls._set_option(OptionKeys.allow_register, value)
 
     @my_property(ttl=DEFAULT_SHORT_TTL)
     def submission_list_show_all(cls):
+        # 获取是否显示所有提交列表
         return cls._get_option(OptionKeys.submission_list_show_all)
 
     @submission_list_show_all.setter
     def submission_list_show_all(cls, value):
+        # 设置是否显示所有提交列表
         cls._set_option(OptionKeys.submission_list_show_all, value)
 
     @my_property
     def smtp_config(cls):
+        # 获取 SMTP 配置
         return cls._get_option(OptionKeys.smtp_config)
 
     @smtp_config.setter
     def smtp_config(cls, value):
+        # 设置 SMTP 配置
         cls._set_option(OptionKeys.smtp_config, value)
 
     @my_property
     def judge_server_token(cls):
+        # 获取评测服务器令牌
         return cls._get_option(OptionKeys.judge_server_token)
 
     @judge_server_token.setter
     def judge_server_token(cls, value):
+        # 设置评测服务器令牌
         cls._set_option(OptionKeys.judge_server_token, value)
 
     @my_property
     def throttling(cls):
+        # 获取限流配置
         return cls._get_option(OptionKeys.throttling)
 
     @throttling.setter
     def throttling(cls, value):
+        # 设置限流配置
         cls._set_option(OptionKeys.throttling, value)
 
     @my_property(ttl=DEFAULT_SHORT_TTL)
     def languages(cls):
+        # 获取语言配置
         return cls._get_option(OptionKeys.languages)
 
     @languages.setter
     def languages(cls, value):
+        # 设置语言配置
         cls._set_option(OptionKeys.languages, value)
 
     @my_property(ttl=DEFAULT_SHORT_TTL)
     def spj_languages(cls):
+        # 获取特定语言配置
         return [item for item in cls.languages if "spj" in item]
 
     @my_property(ttl=DEFAULT_SHORT_TTL)
     def language_names(cls):
+        # 获取语言名称列表
         return [item["name"] for item in cls.languages]
 
     @my_property(ttl=DEFAULT_SHORT_TTL)
     def spj_language_names(cls):
+        # 获取特定语言名称列表
         return [item["name"] for item in cls.languages if "spj" in item]
 
     def reset_languages(cls):
+        # 重置语言配置
         cls.languages = languages
 
 

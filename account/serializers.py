@@ -5,139 +5,158 @@ from utils.api import serializers, UsernameSerializer
 from .models import AdminType, ProblemPermission, User, UserProfile
 
 
+# 用户登录序列化器
 class UserLoginSerializer(serializers.Serializer):
-    username = serializers.CharField()
-    password = serializers.CharField()
-    tfa_code = serializers.CharField(required=False, allow_blank=True)
+    username = serializers.CharField()  # 用户名字段
+    password = serializers.CharField()  # 密码字段
+    tfa_code = serializers.CharField(required=False, allow_blank=True)  # 双因素认证代码字段，可选
 
 
+# 用户名或邮箱检查序列化器
 class UsernameOrEmailCheckSerializer(serializers.Serializer):
-    username = serializers.CharField(required=False)
-    email = serializers.EmailField(required=False)
+    username = serializers.CharField(required=False)  # 用户名字段，可选
+    email = serializers.EmailField(required=False)  # 邮箱字段，可选
 
 
+# 用户注册序列化器
 class UserRegisterSerializer(serializers.Serializer):
-    username = serializers.CharField(max_length=32)
-    password = serializers.CharField(min_length=6)
-    email = serializers.EmailField(max_length=64)
-    captcha = serializers.CharField()
+    username = serializers.CharField(max_length=32)  # 用户名字段，最大长度32
+    password = serializers.CharField(min_length=6)  # 密码字段，最小长度6
+    email = serializers.EmailField(max_length=64)  # 邮箱字段，最大长度64
+    captcha = serializers.CharField()  # 验证码字段
 
 
+# 用户修改密码序列化器
 class UserChangePasswordSerializer(serializers.Serializer):
-    old_password = serializers.CharField()
-    new_password = serializers.CharField(min_length=6)
-    tfa_code = serializers.CharField(required=False, allow_blank=True)
+    old_password = serializers.CharField()  # 旧密码字段
+    new_password = serializers.CharField(min_length=6)  # 新密码字段，最小长度6
+    tfa_code = serializers.CharField(required=False, allow_blank=True)  # 双因素认证代码字段，可选
 
 
+# 用户修改邮箱序列化器
 class UserChangeEmailSerializer(serializers.Serializer):
-    password = serializers.CharField()
-    new_email = serializers.EmailField(max_length=64)
-    tfa_code = serializers.CharField(required=False, allow_blank=True)
+    password = serializers.CharField()  # 密码字段
+    new_email = serializers.EmailField(max_length=64)  # 新邮箱字段，最大长度64
+    tfa_code = serializers.CharField(required=False, allow_blank=True)  # 双因素认证代码字段，可选
 
 
+# 生成用户序列化器
 class GenerateUserSerializer(serializers.Serializer):
-    prefix = serializers.CharField(max_length=16, allow_blank=True)
-    suffix = serializers.CharField(max_length=16, allow_blank=True)
-    number_from = serializers.IntegerField()
-    number_to = serializers.IntegerField()
-    password_length = serializers.IntegerField(max_value=16, default=8)
+    prefix = serializers.CharField(max_length=16, allow_blank=True)  # 前缀字段，最大长度16，可选
+    suffix = serializers.CharField(max_length=16, allow_blank=True)  # 后缀字段，最大长度16，可选
+    number_from = serializers.IntegerField()  # 起始编号字段
+    number_to = serializers.IntegerField()  # 结束编号字段
+    password_length = serializers.IntegerField(max_value=16, default=8)  # 密码长度字段，最大值16，默认8
 
 
+# 导入用户序列化器
 class ImportUserSeralizer(serializers.Serializer):
     users = serializers.ListField(
-        child=serializers.ListField(child=serializers.CharField(max_length=64)))
+        child=serializers.ListField(child=serializers.CharField(max_length=64)))  # 用户列表字段，子元素为最大长度64的字符列表
 
 
+# 用户管理员序列化器
 class UserAdminSerializer(serializers.ModelSerializer):
-    real_name = serializers.SerializerMethodField()
+    real_name = serializers.SerializerMethodField()  # 实名字段，通过方法获取
 
     class Meta:
-        model = User
+        model = User  # 关联的模型
         fields = ["id", "username", "email", "admin_type", "problem_permission", "real_name",
-                  "create_time", "last_login", "two_factor_auth", "open_api", "is_disabled"]
+                  "create_time", "last_login", "two_factor_auth", "open_api", "is_disabled"]  # 序列化的字段
 
     def get_real_name(self, obj):
-        return obj.userprofile.real_name
+        return obj.userprofile.real_name  # 获取用户资料中的实名
 
 
+# 用户序列化器
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
+        model = User  # 关联的模型
         fields = ["id", "username", "email", "admin_type", "problem_permission",
-                  "create_time", "last_login", "two_factor_auth", "open_api", "is_disabled"]
+                  "create_time", "last_login", "two_factor_auth", "open_api", "is_disabled"]  # 序列化的字段
 
 
+# 用户资料序列化器
 class UserProfileSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
-    real_name = serializers.SerializerMethodField()
+    user = UserSerializer()  # 嵌套的用户序列化器
+    real_name = serializers.SerializerMethodField()  # 实名字段，通过方法获取
 
     class Meta:
-        model = UserProfile
-        fields = "__all__"
+        model = UserProfile  # 关联的模型
+        fields = "__all__"  # 序列化所有字段
 
     def __init__(self, *args, **kwargs):
-        self.show_real_name = kwargs.pop("show_real_name", False)
+        self.show_real_name = kwargs.pop("show_real_name", False)  # 是否显示实名
         super(UserProfileSerializer, self).__init__(*args, **kwargs)
 
     def get_real_name(self, obj):
-        return obj.real_name if self.show_real_name else None
+        return obj.real_name if self.show_real_name else None  # 根据条件返回实名
 
 
+# 编辑用户序列化器
 class EditUserSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
-    username = serializers.CharField(max_length=32)
-    real_name = serializers.CharField(max_length=32, allow_blank=True, allow_null=True)
-    password = serializers.CharField(min_length=6, allow_blank=True, required=False, default=None)
-    email = serializers.EmailField(max_length=64)
-    admin_type = serializers.ChoiceField(choices=(AdminType.REGULAR_USER, AdminType.ADMIN, AdminType.SUPER_ADMIN))
+    id = serializers.IntegerField()  # 用户ID字段
+    username = serializers.CharField(max_length=32)  # 用户名字段，最大长度32
+    real_name = serializers.CharField(max_length=32, allow_blank=True, allow_null=True)  # 实名字段，最大长度32，可选
+    password = serializers.CharField(min_length=6, allow_blank=True, required=False, default=None)  # 密码字段，最小长度6，可选
+    email = serializers.EmailField(max_length=64)  # 邮箱字段，最大长度64
+    admin_type = serializers.ChoiceField(choices=(AdminType.REGULAR_USER, AdminType.ADMIN, AdminType.SUPER_ADMIN))  # 管理员类型字段
     problem_permission = serializers.ChoiceField(choices=(ProblemPermission.NONE, ProblemPermission.OWN,
-                                                          ProblemPermission.ALL))
-    open_api = serializers.BooleanField()
-    two_factor_auth = serializers.BooleanField()
-    is_disabled = serializers.BooleanField()
+                                                          ProblemPermission.ALL))  # 问题权限字段
+    open_api = serializers.BooleanField()  # 开放API字段
+    two_factor_auth = serializers.BooleanField()  # 双因素认证字段
+    is_disabled = serializers.BooleanField()  # 禁用状态字段
 
 
+# 编辑用户资料序列化器
 class EditUserProfileSerializer(serializers.Serializer):
-    real_name = serializers.CharField(max_length=32, allow_null=True, required=False)
-    avatar = serializers.CharField(max_length=256, allow_blank=True, required=False)
-    blog = serializers.URLField(max_length=256, allow_blank=True, required=False)
-    mood = serializers.CharField(max_length=256, allow_blank=True, required=False)
-    github = serializers.URLField(max_length=256, allow_blank=True, required=False)
-    school = serializers.CharField(max_length=64, allow_blank=True, required=False)
-    major = serializers.CharField(max_length=64, allow_blank=True, required=False)
-    language = serializers.CharField(max_length=32, allow_blank=True, required=False)
+    real_name = serializers.CharField(max_length=32, allow_null=True, required=False)  # 实名字段，最大长度32，可选
+    avatar = serializers.CharField(max_length=256, allow_blank=True, required=False)  # 头像字段，最大长度256，可选
+    blog = serializers.URLField(max_length=256, allow_blank=True, required=False)  # 博客字段，最大长度256，可选
+    mood = serializers.CharField(max_length=256, allow_blank=True, required=False)  # 心情字段，最大长度256，可选
+    github = serializers.URLField(max_length=256, allow_blank=True, required=False)  # GitHub字段，最大长度256，可选
+    school = serializers.CharField(max_length=64, allow_blank=True, required=False)  # 学校字段，最大长度64，可选
+    major = serializers.CharField(max_length=64, allow_blank=True, required=False)  # 专业字段，最大长度64，可选
+    language = serializers.CharField(max_length=32, allow_blank=True, required=False)  # 语言字段，最大长度32，可选
 
 
+# 申请重置密码序列化器
 class ApplyResetPasswordSerializer(serializers.Serializer):
-    email = serializers.EmailField()
-    captcha = serializers.CharField()
+    email = serializers.EmailField()  # 邮箱字段
+    captcha = serializers.CharField()  # 验证码字段
 
 
+# 重置密码序列化器
 class ResetPasswordSerializer(serializers.Serializer):
-    token = serializers.CharField()
-    password = serializers.CharField(min_length=6)
-    captcha = serializers.CharField()
+    token = serializers.CharField()  # 令牌字段
+    password = serializers.CharField(min_length=6)  # 密码字段，最小长度6
+    captcha = serializers.CharField()  # 验证码字段
 
 
+# SSO序列化器
 class SSOSerializer(serializers.Serializer):
-    token = serializers.CharField()
+    token = serializers.CharField()  # 令牌字段
 
 
+# 双因素认证代码序列化器
 class TwoFactorAuthCodeSerializer(serializers.Serializer):
-    code = serializers.IntegerField()
+    code = serializers.IntegerField()  # 代码字段
 
 
+# 图片上传表单
 class ImageUploadForm(forms.Form):
-    image = forms.FileField()
+    image = forms.FileField()  # 图片文件字段
 
 
+# 文件上传表单
 class FileUploadForm(forms.Form):
-    file = forms.FileField()
+    file = forms.FileField()  # 文件字段
 
 
+# 排名信息序列化器
 class RankInfoSerializer(serializers.ModelSerializer):
-    user = UsernameSerializer()
+    user = UsernameSerializer()  # 嵌套的用户名序列化器
 
     class Meta:
-        model = UserProfile
-        fields = "__all__"
+        model = UserProfile  # 关联的模型
+        fields = "__all__"  # 序列化所有字段

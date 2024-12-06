@@ -37,9 +37,11 @@ class ChooseJudgeServer:
 
     def __enter__(self) -> [JudgeServer, None]:
         with transaction.atomic():
+            # 获取所有可用的判题服务器，并按任务数量排序
             servers = JudgeServer.objects.select_for_update().filter(is_disabled=False).order_by("task_number")
             servers = [s for s in servers if s.status == "normal"]
             for server in servers:
+                # 如果任务数量小于等于CPU核心数的两倍，则选择该服务器
                 if server.task_number <= server.cpu_core * 2:
                     server.task_number = F("task_number") + 1
                     server.save(update_fields=["task_number"])
@@ -49,11 +51,13 @@ class ChooseJudgeServer:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         if self.server:
+            # 任务完成后，减少任务数量
             JudgeServer.objects.filter(id=self.server.id).update(task_number=F("task_number") - 1)
 
 
 class DispatcherBase(object):
     def __init__(self):
+        # 生成判题服务器的token
         self.token = hashlib.sha256(SysOptions.judge_server_token.encode("utf-8")).hexdigest()
 
     def _request(self, url, data=None):
@@ -69,6 +73,7 @@ class DispatcherBase(object):
 class SPJCompiler(DispatcherBase):
     def __init__(self, spj_code, spj_version, spj_language):
         super().__init__()
+        # 获取特殊判题的编译配置
         spj_compile_config = list(filter(lambda config: spj_language == config["name"], SysOptions.spj_languages))[0]["spj"][
             "compile"]
         self.data = {
@@ -106,7 +111,7 @@ class JudgeDispatcher(DispatcherBase):
         self.submission.statistic_info["time_cost"] = max([x["cpu_time"] for x in resp_data])
         self.submission.statistic_info["memory_cost"] = max([x["memory"] for x in resp_data])
 
-        # sum up the score in OI mode
+        # OI模式下，计算总分
         if self.problem.rule_type == ProblemRuleType.OI:
             score = 0
             try:
@@ -205,7 +210,7 @@ class JudgeDispatcher(DispatcherBase):
         result = str(self.submission.result)
         problem_id = str(self.problem.id)
         with transaction.atomic():
-            # update problem status
+            # 更新题目状态
             problem = Problem.objects.select_for_update().get(contest_id=self.contest_id, id=self.problem.id)
             if self.last_result != JudgeStatus.ACCEPTED and self.submission.result == JudgeStatus.ACCEPTED:
                 problem.accepted_number += 1
@@ -228,7 +233,7 @@ class JudgeDispatcher(DispatcherBase):
                 oi_problems_status = profile.oi_problems_status.get("problems", {})
                 score = self.submission.statistic_info["score"]
                 if oi_problems_status[problem_id]["status"] != JudgeStatus.ACCEPTED:
-                    # minus last time score, add this tim score
+                    # 减去上次得分，增加本次得分
                     profile.add_score(this_time_score=score,
                                       last_time_score=oi_problems_status[problem_id]["score"])
                     oi_problems_status[problem_id]["score"] = score
@@ -242,7 +247,7 @@ class JudgeDispatcher(DispatcherBase):
         result = str(self.submission.result)
         problem_id = str(self.problem.id)
         with transaction.atomic():
-            # update problem status
+            # 更新题目状态
             problem = Problem.objects.select_for_update().get(contest_id=self.contest_id, id=self.problem.id)
             problem.submission_number += 1
             if self.submission.result == JudgeStatus.ACCEPTED:
@@ -251,7 +256,7 @@ class JudgeDispatcher(DispatcherBase):
             problem_info[result] = problem_info.get(result, 0) + 1
             problem.save(update_fields=["accepted_number", "submission_number", "statistic_info"])
 
-            # update_userprofile
+            # 更新用户信息
             user = User.objects.select_for_update().get(id=self.submission.user_id)
             user_profile = user.userprofile
             user_profile.submission_number += 1
@@ -279,7 +284,7 @@ class JudgeDispatcher(DispatcherBase):
                     if self.submission.result == JudgeStatus.ACCEPTED:
                         user_profile.accepted_number += 1
                 elif oi_problems_status[problem_id]["status"] != JudgeStatus.ACCEPTED:
-                    # minus last time score, add this time score
+                    # 减去上次得分，增加本次得分
                     user_profile.add_score(this_time_score=score,
                                            last_time_score=oi_problems_status[problem_id]["score"])
                     oi_problems_status[problem_id]["score"] = score
