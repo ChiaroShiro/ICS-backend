@@ -1,7 +1,4 @@
-#from django.conf.urls import url
-
 from django.urls import re_path
-
 from ..views import SMTPAPI, JudgeServerAPI, WebsiteConfigAPI, TestCasePruneAPI, SMTPTestAPI
 from ..views import ReleaseNotesAPI, DashboardInfoAPI
 
@@ -14,12 +11,3 @@ urlpatterns = [
     # re_path(r"^versions/?$", ReleaseNotesAPI.as_view(), name="get_release_notes_api"),
     re_path(r"^dashboard_info", DashboardInfoAPI.as_view(), name="dashboard_info_api"),
 ]
-
-"""
-    API 说明：
-
-        本文件定义了 网站管理端中 super-admin级别用户(超级管理员) 进行 SMTP(邮件传输协议)配置以及网站配置等功能的路由
-
-        其具体功能包括 在 网站管理端中管理 SMTP设置，包括网站的服务器，邮箱，端口号，基础URL，以及针对是否允许注册的相关开关等
-
-"""
