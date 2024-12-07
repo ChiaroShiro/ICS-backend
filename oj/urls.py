@@ -1,23 +1,20 @@
 from django.conf.urls import include
-from django.urls import path
+from django.urls import re_path
 
 urlpatterns = [
-    #include() 是 Django 中的一个函数，用来引用其他的 URL 配置模块。
-    #如include("account.urls.oj")表示该url与下属的account.urls.oj中的对应url拼接
-
-    path("api/", include("account.urls.oj")),
-    path("api/admin/", include("account.urls.admin")),
-    path("api/", include("announcement.urls.oj")),
-    path("api/admin/", include("announcement.urls.admin")),
-    path("api/", include("conf.urls.oj")),
-    path("api/admin/", include("conf.urls.admin")),
-    path("api/", include("problem.urls.oj")),
-    path("api/admin/", include("problem.urls.admin")),
-    path("api/", include("contest.urls.oj")),
-    path("api/admin/", include("contest.urls.admin")),
-    path("api/", include("submission.urls.oj")),
-    path("api/admin/", include("submission.urls.admin")),
-    path("api/admin/", include("utils.urls"))
+    re_path(r"^api/", include("account.urls.oj")),
+    re_path(r"^api/admin/", include("account.urls.admin")),
+    re_path(r"^api/", include("announcement.urls.oj")),
+    re_path(r"^api/admin/", include("announcement.urls.admin")),
+    re_path(r"^api/", include("conf.urls.oj")),
+    re_path(r"^api/admin/", include("conf.urls.admin")),
+    re_path(r"^api/", include("problem.urls.oj")),
+    re_path(r"^api/admin/", include("problem.urls.admin")),
+    re_path(r"^api/", include("contest.urls.oj")),
+    re_path(r"^api/admin/", include("contest.urls.admin")),
+    re_path(r"^api/", include("submission.urls.oj")),
+    re_path(r"^api/admin/", include("submission.urls.admin")),
+    re_path(r"^api/admin/", include("utils.urls")),
 ]
 
 """

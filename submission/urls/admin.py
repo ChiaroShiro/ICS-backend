@@ -1,14 +1,12 @@
 #from django.conf.urls import urls
 
-from django.urls import path
+from django.urls import re_path
 
 from ..views.admin import SubmissionRejudgeAPI
 
 urlpatterns = [
-
-    path("submission/rejudge", SubmissionRejudgeAPI.as_view(), name="submission_rejudge_api")
+    re_path(r"^submission/rejudge?$", SubmissionRejudgeAPI.as_view(), name="submission_rejudge_api"),
 ]
-
 """
     API 说明：
 
