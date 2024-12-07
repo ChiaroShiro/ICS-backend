@@ -21,8 +21,6 @@ if production_env:
 else:
     from .dev_settings import *
 
-from .dev_settings import *
-
 # 读取密钥文件
 with open(os.path.join(DATA_DIR, "config", "secret.key"), "r") as f:
     SECRET_KEY = f.read()
@@ -159,7 +157,6 @@ STATICFILES_DIRS = [os.path.join(DATA_DIR, "public")]
 
 # 日志处理程序
 LOGGING_HANDLERS = ['console', 'sentry'] if production_env else ['console']
-# LOGGING_HANDLERS = ['console']
 
 # 日志配置
 LOGGING = {
