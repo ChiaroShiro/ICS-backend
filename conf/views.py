@@ -208,18 +208,18 @@ class TestCasePruneAPI(APIView):
             shutil.rmtree(test_case_dir, ignore_errors=True)
 
 
-class ReleaseNotesAPI(APIView):
-    def get(self, request):
-        try:
-            resp = requests.get("https://raw.githubusercontent.com/QingdaoU/OnlineJudge/master/docs/data.json?_=" + str(time.time()),
-                                timeout=3)
-            releases = resp.json()
-        except (RequestException, ValueError):
-            return self.success()
-        with open("docs/data.json", "r") as f:
-            local_version = json.load(f)["update"][0]["version"]
-        releases["local_version"] = local_version
-        return self.success(releases)
+# class ReleaseNotesAPI(APIView):
+#     def get(self, request):
+#         try:
+#             resp = requests.get("https://raw.githubusercontent.com/QingdaoU/OnlineJudge/master/docs/data.json?_=" + str(time.time()),
+#                                 timeout=3)
+#             releases = resp.json()
+#         except (RequestException, ValueError):
+#             return self.success()
+#         with open("docs/data.json", "r") as f:
+#             local_version = json.load(f)["update"][0]["version"]
+#         releases["local_version"] = local_version
+#         return self.success(releases)
 
 
 class DashboardInfoAPI(APIView):

@@ -1,6 +1,6 @@
 from django.urls import re_path
 from ..views import SMTPAPI, JudgeServerAPI, WebsiteConfigAPI, TestCasePruneAPI, SMTPTestAPI
-from ..views import ReleaseNotesAPI, DashboardInfoAPI
+from ..views import DashboardInfoAPI
 
 urlpatterns = [
     re_path(r"^smtp/?$", SMTPAPI.as_view(), name="smtp_admin_api"),
