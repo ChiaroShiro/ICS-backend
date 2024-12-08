@@ -6,7 +6,6 @@ from utils.models import RichTextField
 
 class Announcement(models.Model):
     title = models.TextField()
-    # HTML
     content = RichTextField()
     create_time = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
