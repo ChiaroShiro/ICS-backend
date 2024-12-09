@@ -13,9 +13,9 @@ urlpatterns = [
     re_path(r"^contest/problem/?$", ContestProblemAPI.as_view(), name="contest_problem_admin_api"),
     re_path(r"^contest_problem/make_public/?$", MakeContestProblemPublicAPIView.as_view(), name="make_public_api"),
     re_path(r"^contest/add_problem_from_public/?$", AddContestProblemAPI.as_view(), name="add_contest_problem_from_public_api"),
-    re_path(r"^export_problem/?$", ExportProblemAPI.as_view(), name="export_problem_api"),
-    re_path(r"^import_problem/?$", ImportProblemAPI.as_view(), name="import_problem_api"),
-    re_path(r"^import_fps/?$", FPSProblemImport.as_view(), name="fps_problem_api"),
+    # re_path(r"^export_problem/?$", ExportProblemAPI.as_view(), name="export_problem_api"),
+    # re_path(r"^import_problem/?$", ImportProblemAPI.as_view(), name="import_problem_api"),
+    # re_path(r"^import_fps/?$", FPSProblemImport.as_view(), name="fps_problem_api"),
 ]
 
 """
