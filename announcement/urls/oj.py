@@ -1,5 +1,3 @@
-from django.conf.urls import url
-
 from ..views.oj import AnnouncementAPI
 from django.urls import re_path
 

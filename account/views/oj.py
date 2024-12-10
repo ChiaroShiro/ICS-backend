@@ -2,7 +2,6 @@ import os
 from datetime import timedelta
 from importlib import import_module
 
-import qrcode
 from django.conf import settings
 from django.contrib import auth
 from django.template.loader import render_to_string
@@ -11,20 +10,17 @@ from django.utils.timezone import now
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 from otpauth import OtpAuth
 
-from problem.models import Problem
-from utils.constants import ContestRuleType
 from options.options import SysOptions
 from utils.api import APIView, validate_serializer, CSRFExemptAPIView
 from utils.captcha import Captcha
-from utils.shortcuts import rand_str, img2base64, datetime2str
+from utils.shortcuts import rand_str, datetime2str
 from ..decorators import login_required
-from ..models import User, UserProfile, AdminType
+from ..models import User, UserProfile
 from ..serializers import (ApplyResetPasswordSerializer, ResetPasswordSerializer,
                            UserChangePasswordSerializer, UserLoginSerializer,
                            UserRegisterSerializer, UsernameOrEmailCheckSerializer,
-                           RankInfoSerializer, UserChangeEmailSerializer, SSOSerializer)
-from ..serializers import (TwoFactorAuthCodeSerializer, UserProfileSerializer,
-                           EditUserProfileSerializer, ImageUploadForm)
+                           UserChangeEmailSerializer, SSOSerializer)
+from ..serializers import (UserProfileSerializer, EditUserProfileSerializer, ImageUploadForm)
 from ..tasks import send_email_async
 
 
@@ -86,56 +82,6 @@ class AvatarUploadAPI(APIView):
         user_profile.avatar = f"{settings.AVATAR_URI_PREFIX}/{name}"
         user_profile.save()
         return self.success("Succeeded")
-
-
-class TwoFactorAuthAPI(APIView):
-    @login_required
-    def get(self, request):
-        """
-        获取二维码
-        """
-        user = request.user
-        if user.two_factor_auth:
-            return self.error("2FA is already turned on")
-        token = rand_str()
-        user.tfa_token = token
-        user.save()
-
-        label = f"{SysOptions.website_name_shortcut}:{user.username}"
-        image = qrcode.make(OtpAuth(token).to_uri("totp", label, SysOptions.website_name.replace(" ", "")))
-        return self.success(img2base64(image))
-
-    @login_required
-    @validate_serializer(TwoFactorAuthCodeSerializer)
-    def post(self, request):
-        """
-        开启2FA
-        """
-        code = request.data["code"]
-        user = request.user
-        if OtpAuth(user.tfa_token).valid_totp(code):
-            user.two_factor_auth = True
-            user.save()
-            return self.success("Succeeded")
-        else:
-            return self.error("Invalid code")
-
-    @login_required
-    @validate_serializer(TwoFactorAuthCodeSerializer)
-    def put(self, request):
-        """
-        关闭2FA
-        """
-        code = request.data["code"]
-        user = request.user
-        if not user.two_factor_auth:
-            return self.error("2FA is already turned off")
-        if OtpAuth(user.tfa_token).valid_totp(code):
-            user.two_factor_auth = False
-            user.save()
-            return self.success("Succeeded")
-        else:
-            return self.error("Invalid code")
 
 
 class CheckTFARequiredAPI(APIView):
@@ -404,45 +350,6 @@ class SessionManagementAPI(APIView):
             return self.success("Succeeded")
         else:
             return self.error("Invalid session_key")
-
-
-class UserRankAPI(APIView):
-    def get(self, request):
-        """
-        获取用户排名
-        """
-        rule_type = request.GET.get("rule")
-        if rule_type not in ContestRuleType.choices():
-            rule_type = ContestRuleType.ACM
-        profiles = UserProfile.objects.filter(user__admin_type=AdminType.REGULAR_USER, user__is_disabled=False) \
-            .select_related("user")
-        if rule_type == ContestRuleType.ACM:
-            profiles = profiles.filter(submission_number__gt=0).order_by("-accepted_number", "submission_number")
-        else:
-            profiles = profiles.filter(total_score__gt=0).order_by("-total_score")
-        return self.success(self.paginate_data(request, profiles, RankInfoSerializer))
-
-
-class ProfileProblemDisplayIDRefreshAPI(APIView):
-    @login_required
-    def get(self, request):
-        """
-        刷新问题显示ID
-        """
-        profile = request.user.userprofile
-        acm_problems = profile.acm_problems_status.get("problems", {})
-        oi_problems = profile.oi_problems_status.get("problems", {})
-        ids = list(acm_problems.keys()) + list(oi_problems.keys())
-        if not ids:
-            return self.success()
-        display_ids = Problem.objects.filter(id__in=ids, visible=True).values_list("_id", flat=True)
-        id_map = dict(zip(ids, display_ids))
-        for k, v in acm_problems.items():
-            v["_id"] = id_map[k]
-        for k, v in oi_problems.items():
-            v["_id"] = id_map[k]
-        profile.save(update_fields=["acm_problems_status", "oi_problems_status"])
-        return self.success()
 
 
 class OpenAPIAppkeyAPI(APIView):

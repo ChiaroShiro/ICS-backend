@@ -1,7 +1,4 @@
-#from django.conf.urls import url
-
 from django.urls import re_path
-
 from ..views.admin import ContestAnnouncementAPI, ContestAPI, ACMContestHelper, DownloadContestSubmissions
 
 urlpatterns = [

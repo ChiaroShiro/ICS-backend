@@ -1,7 +1,4 @@
-#from django.conf.urls import urls
-
 from django.urls import re_path
-
 from ..views.oj import SubmissionAPI, SubmissionListAPI, ContestSubmissionListAPI, SubmissionExistsAPI
 
 urlpatterns = [

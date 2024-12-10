@@ -1,7 +1,4 @@
-#from django.conf.urls import url
-
 from django.urls import re_path
-
 from ..views.oj import ProblemTagAPI, ProblemAPI, ContestProblemAPI, PickOneAPI
 
 urlpatterns = [

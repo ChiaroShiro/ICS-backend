@@ -203,10 +203,6 @@ class AddContestProblemSerializer(serializers.Serializer):
     display_id = serializers.CharField()
 
 
-class ExportProblemRequestSerialzier(serializers.Serializer):
-    problem_id = serializers.ListField(child=serializers.IntegerField(), allow_empty=False)
-
-
 class UploadProblemForm(forms.Form):
     file = forms.FileField()
 
@@ -236,42 +232,3 @@ class SPJSerializer(serializers.Serializer):
 class AnswerSerializer(serializers.Serializer):
     code = serializers.CharField()
     language = LanguageNameChoiceField()
-
-
-class ImportProblemSerializer(serializers.Serializer):
-    display_id = serializers.CharField(max_length=128)
-    title = serializers.CharField(max_length=128)
-    description = FormatValueSerializer()
-    input_description = FormatValueSerializer()
-    output_description = FormatValueSerializer()
-    hint = FormatValueSerializer()
-    test_case_score = serializers.ListField(child=TestCaseScoreSerializer(), allow_null=True)
-    time_limit = serializers.IntegerField(min_value=1, max_value=60000)
-    memory_limit = serializers.IntegerField(min_value=1, max_value=10240)
-    samples = serializers.ListField(child=CreateSampleSerializer())
-    template = serializers.DictField(child=TemplateSerializer())
-    spj = SPJSerializer(allow_null=True)
-    rule_type = serializers.ChoiceField(choices=ProblemRuleType.choices())
-    source = serializers.CharField(max_length=200, allow_blank=True, allow_null=True)
-    answers = serializers.ListField(child=AnswerSerializer())
-    tags = serializers.ListField(child=serializers.CharField())
-
-
-class FPSProblemSerializer(serializers.Serializer):
-    class UnitSerializer(serializers.Serializer):
-        unit = serializers.ChoiceField(choices=["MB", "s", "ms"])
-        value = serializers.IntegerField(min_value=1, max_value=60000)
-
-    title = serializers.CharField(max_length=128)
-    description = serializers.CharField()
-    input = serializers.CharField()
-    output = serializers.CharField()
-    hint = serializers.CharField(allow_blank=True, allow_null=True)
-    time_limit = UnitSerializer()
-    memory_limit = UnitSerializer()
-    samples = serializers.ListField(child=CreateSampleSerializer())
-    source = serializers.CharField(max_length=200, allow_blank=True, allow_null=True)
-    spj = SPJSerializer(allow_null=True)
-    template = serializers.ListField(child=serializers.DictField(), allow_empty=True, allow_null=True)
-    append = serializers.ListField(child=serializers.DictField(), allow_empty=True, allow_null=True)
-    prepend = serializers.ListField(child=serializers.DictField(), allow_empty=True, allow_null=True)

@@ -1,16 +1,10 @@
-# from django.conf.urls import url
-# 此处使用的是django 1.x 的用法，使用的是正则表达式方法的url
-
 from django.urls import re_path
-# django 2.x 以后，一律使用字符串表达的path，可读性高，易于修改
 
 
-from ..views.admin import UserAdminAPI, GenerateUserAPI
+from ..views.admin import UserAdminAPI
 
 urlpatterns = [
-
     re_path(r"^user/?$", UserAdminAPI.as_view(), name="user_admin_api"),
-    # re_path(r"^generate_user/?$", GenerateUserAPI.as_view(), name="generate_user_api"),
 ]
 
 """

@@ -40,15 +40,6 @@ class UserChangeEmailSerializer(serializers.Serializer):
     tfa_code = serializers.CharField(required=False, allow_blank=True)  # 双因素认证代码字段，可选
 
 
-# 生成用户序列化器
-class GenerateUserSerializer(serializers.Serializer):
-    prefix = serializers.CharField(max_length=16, allow_blank=True)  # 前缀字段，最大长度16，可选
-    suffix = serializers.CharField(max_length=16, allow_blank=True)  # 后缀字段，最大长度16，可选
-    number_from = serializers.IntegerField()  # 起始编号字段
-    number_to = serializers.IntegerField()  # 结束编号字段
-    password_length = serializers.IntegerField(max_value=16, default=8)  # 密码长度字段，最大值16，默认8
-
-
 # 导入用户序列化器
 class ImportUserSeralizer(serializers.Serializer):
     users = serializers.ListField(
@@ -138,11 +129,6 @@ class SSOSerializer(serializers.Serializer):
     token = serializers.CharField()  # 令牌字段
 
 
-# 双因素认证代码序列化器
-class TwoFactorAuthCodeSerializer(serializers.Serializer):
-    code = serializers.IntegerField()  # 代码字段
-
-
 # 图片上传表单
 class ImageUploadForm(forms.Form):
     image = forms.FileField()  # 图片文件字段
@@ -151,12 +137,3 @@ class ImageUploadForm(forms.Form):
 # 文件上传表单
 class FileUploadForm(forms.Form):
     file = forms.FileField()  # 文件字段
-
-
-# 排名信息序列化器
-class RankInfoSerializer(serializers.ModelSerializer):
-    user = UsernameSerializer()  # 嵌套的用户名序列化器
-
-    class Meta:
-        model = UserProfile  # 关联的模型
-        fields = "__all__"  # 序列化所有字段

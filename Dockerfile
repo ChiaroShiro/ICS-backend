@@ -2,14 +2,6 @@ FROM alpine:3.19 AS downloader
 
 WORKDIR /app
 
-# RUN <<EOS
-# set -ex
-# apk add unzip
-# wget https://github.com/QingdaoU/OnlineJudgeFE/releases/download/oj_2.7.5/dist.zip
-# unzip dist.zip
-# rm -f dist.zip
-# EOS
-
 FROM python:3.12-alpine
 ARG TARGETARCH
 ARG TARGETVARIANT
@@ -30,7 +22,6 @@ apk del gcc libc-dev python3-dev libpq-dev libjpeg-turbo-dev zlib-dev freetype-d
 EOS
 
 COPY ./ /app/
-# COPY --from=downloader --link /app/dist/ /app/dist/
 RUN chmod -R u=rwX,go=rX ./ && chmod +x ./deploy/entrypoint.sh
 
 HEALTHCHECK --interval=5s CMD [ "/usr/local/bin/python3", "/app/deploy/health_check.py" ]
